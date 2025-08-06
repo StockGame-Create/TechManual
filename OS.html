@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>운영체제 메뉴얼</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+            text-align: center;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .search-box {
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 25px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .filter-buttons {
+            margin: 20px 0;
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .languages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .language-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .language-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .language-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .language-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .language-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .language-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .language-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .language-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .language-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            background: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .code-preview {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+            max-height: 0;
+            transition: all 0.5s ease;
+        }
+
+        .code-preview.expanded {
+            max-height: 200px;
+        }
+
+        .toggle-code {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .toggle-code:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 3px;
+            transition: width 2s ease;
+            width: 0;
+        }
+
+        .language-card.visible .progress-fill {
+            width: var(--popularity);
+        }
+
+        /* Language specific colors */
+        .windows { --accent-color: #2970c0; }
+        .linux { --accent-color: #030405; }
+        .macos { --accent-color: #63b3c7; }
+        .chromeos { --accent-color: #df3b35; }
+        .android { --accent-color: #21f1b3; }
+        .ios { --accent-color: #8496aa; }
+        .unix { --accent-color: #ff9ff2; }
+        .bsd { --accent-color: #ff9010; }
+        .blackberry { --accent-color: #31221c; }
+
+
+
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .languages-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .floating-stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .difficulty-indicator {
+            display: flex;
+            gap: 3px;
+            margin-top: 5px;
+        }
+
+        .difficulty-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-dot.filled {
+            background: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>운영체제 가이드</h1>
+            <p>현대식 운영체제를 탐구해보세요!</p>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="언어를 검색해보세요... (예: Python, JavaScript)" id="searchInput">
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">전체</button>
+            <button class="filter-btn" data-filter="오픈형">오픈형</button>
+            <button class="filter-btn" data-filter="모바일">모바일</button>
+            <button class="filter-btn" data-filter="데스크탑">데스크탑</button>
+            <button class="filter-btn" data-filter="폐쇄형">폐쇄형</button>
+            <button class="filter-btn" data-filter="친화적UI">친화적UI</button>
+
+
+
+        </div>
+
+        <div class="floating-stats">
+            <div id="statsContent">
+                언어를 선택해주세요
+            </div>
+        </div>
+
+        <div class="languages-grid" id="languagesGrid">
+            <!-- Languages will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <div class="modal" id="languageModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div id="modalContent">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const languages = [
+{
+    name: "Windows",
+    class: "windows",
+    icon: "Win",
+    description: "Microsoft의 대표적인 데스크탑 운영체제. 전 세계에서 가장 널리 사용되는 PC 운영체제입니다.",
+    category: ["데스크탑", "폐쇄형", "친화적UI"],
+    uses: ["개인 컴퓨터", "비즈니스", "게임", "서버", "개발환경"],
+    year: 1985,
+    difficulty: 3,
+    popularity: 28,
+    code: `# PowerShell 예제\nGet-Process | Where-Object {$_.CPU -gt 100} | Select-Object Name, CPU\n\n# 시스템 정보 확인\nGet-ComputerInfo\n\n# 서비스 관리\nGet-Service | Where-Object Status -eq "Running"`,
+    details: "Microsoft Windows는 1985년 처음 출시된 GUI 기반 운영체제입니다. 현재 전 세계 데스크탑 시장의 약 75%를 차지하며, 사용자 친화적인 UI와 광범위한 소프트웨어 호환성으로 널리 사용됩니다.\n\n• NT 커널 기반\n• .NET과 DirectX 지원\n• 레지스트리와 WMI 설정 관리\n• WSL(Linux 서브시스템) 포함\n• 게임과 기업용 환경에 강함"
+},
+{
+    name: "Linux",
+    class: "linux",
+    icon: "Linux",
+    description: "오픈 소스 기반의 유닉스 계열 운영체제. 서버, 데스크탑, 임베디드 시스템 등 다양한 분야에서 널리 사용됩니다.",
+    category: ["오픈형", "데스크탑", "친화적UI"],
+    uses: ["웹 서버", "개발 환경", "해커톤", "슈퍼컴퓨터", "IoT"],
+    year: 1991,
+    difficulty: 4,
+    popularity: 5,
+    code: `# 디스크 사용량 확인\ndf -h\n\n# 현재 실행 중인 프로세스\nps aux | grep ssh\n\n# 패키지 업데이트\nsudo apt update && sudo apt upgrade`,
+    details: "Linux는 커널 자체는 리누스 토르발스가 1991년에 만들었으며 GNU 툴체인과 결합되어 다양한 배포판이 존재합니다.\n\n• 오픈 소스 및 무료\n• 다양한 배포판 (Ubuntu, Fedora 등)\n• 높은 보안성과 안정성\n• 서버/클러스터 환경에 강력함\n• 커스터마이징과 CLI에 최적화"
+},
+{
+    name: "macOS",
+    class: "macos",
+    icon: "Mac",
+    description: "Apple이 개발한 데스크탑 운영체제. 세련된 UI와 Unix 기반의 안정성으로 개발자와 디자이너에게 인기가 높습니다.",
+    category: ["데스크탑", "폐쇄형", "친화적UI"],
+    uses: ["디자인", "iOS 개발", "음악 제작", "크리에이티브 작업", "개발환경"],
+    year: 2001,
+    difficulty: 3,
+    popularity: 7,
+    code: `# 시스템 정보\nsystem_profiler SPSoftwareDataType\n\n# 디스크 확인\ndiskutil list\n\n# Brew 설치\n/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`,
+    details: "macOS는 Darwin 커널을 기반으로 하며 Apple의 하드웨어와 긴밀하게 통합되어 있습니다. 개발자 및 크리에이터에게 선호됩니다.\n\n• BSD 기반 안정성\n• 터미널 기반 유닉스 명령어 지원\n• Retina 디스플레이 및 멀티미디어 강화\n• iCloud, Handoff, Continuity 등 생태계 강점"
+},
+{
+    name: "ChromeOS",
+    class: "chromeos",
+    icon: "Chrome",
+    description: "Google이 개발한 웹 중심의 경량 운영체제. 교육용 및 클라우드 기반 업무에 적합합니다.",
+    category: ["데스크탑", "오픈형", "모바일", "친화적UI"],
+    uses: ["웹 브라우징", "문서 작업", "교육", "Android 앱 실행", "클라우드 업무"],
+    year: 2011,
+    difficulty: 2,
+    popularity: 2,
+    code: `# Crosh 터미널 열기\nCtrl + Alt + T\n\n# 리눅스 앱 설치\nsudo apt install gimp`,
+    details: "ChromeOS는 브라우저 중심 운영체제로, 보안이 강력하고 관리가 쉬워 교육기관에서 많이 사용됩니다.\n\n• 빠른 부팅 속도\n• 자동 업데이트\n• Android, Linux 앱 실행 가능\n• Google 계정 기반 로그인\n• 오프라인 기능 일부 지원"
+},
+{
+    name: "Android",
+    class: "android",
+    icon: "Android",
+    description: "모바일 기기를 위한 Google의 오픈 소스 운영체제. 전 세계 스마트폰의 70% 이상에 사용됩니다.",
+    category: ["모바일", "오픈형", "친화적UI"],
+    uses: ["스마트폰", "태블릿", "스마트TV", "웨어러블", "IoT"],
+    year: 2008,
+    difficulty: 2,
+    popularity: 42,
+    code: `// 안드로이드 Log 출력\nLog.d("MainActivity", "Hello, Android!");\n\n// 매니페스트 예\n<uses-permission android:name="android.permission.INTERNET" />`,
+    details: "Android는 리눅스 커널 위에 Java 기반 프레임워크로 설계된 모바일 OS로, Google Play 스토어를 중심으로 앱 생태계가 큽니다.\n\n• 오픈 소스 (AOSP)\n• 다양한 기기 제조사 지원\n• 커스터마이징 및 루팅 가능\n• Kotlin/Java 기반 개발\n• WearOS, Android TV 등 확장 플랫폼 포함"
+},
+{
+    name: "iOS",
+    class: "ios",
+    icon: "IOS",
+    description: "Apple의 모바일 운영체제. 높은 보안성과 부드러운 UX로 전 세계 프리미엄 시장을 지배합니다.",
+    category: ["모바일"],
+    uses: ["모바일", "폐쇄형", "친화적UI"],
+    year: 2007,
+    difficulty: 2,
+    popularity: 18,
+    code: `// Swift UI 예시\nText("Hello, iOS!")\n    .font(.title)\n    .foregroundColor(.blue)`,
+    details: "iOS는 macOS의 Darwin 기반으로 설계된 모바일 OS이며, 안정성과 보안, 부드러운 애니메이션으로 유명합니다.\n\n• Apple 생태계와 밀접한 통합\n• App Store에서 엄격한 앱 관리\n• Swift와 Xcode 기반 개발\n• 사용자 경험 중심 설계"
+},
+{
+    name: "Unix",
+    class: "unix",
+    icon: "UNIX",
+    description: "1970년대에 개발된 전통적인 멀티태스킹 운영체제. 대부분의 현대 OS는 Unix의 영향을 받았습니다.",
+    category: ["데스크탑", "오픈형"],
+    uses: ["메인프레임", "대형 서버", "네트워크 장비", "교육용", "기반 OS"],
+    year: 1969,
+    difficulty: 5,
+    popularity: 1,
+    code: `# 유닉스 기본 명령어 예시\nls -l\nwhoami\nps -ef\nkill -9 PID`,
+    details: "Unix는 Bell Labs에서 개발되어 POSIX 표준을 만들어냈고, macOS, Linux, BSD 계열의 뿌리가 되는 핵심 운영체제입니다.\n\n• 텍스트 기반 CLI 환경\n• 안정성 및 멀티유저 처리 우수\n• 커널/셸 구조의 모듈화\n• 교육용 및 서버 시장에서 꾸준한 수요"
+},
+{
+    name: "BSD",
+    class: "bsd",
+    icon: "BSD",
+    description: "Unix 기반에서 파생된 자유 소프트웨어 운영체제. 안정성과 보안성으로 유명합니다.",
+    category: ["데스크탑", "오픈형"],
+    uses: ["웹 서버", "방화벽", "라우터", "스토리지", "학술 연구"],
+    year: 1977,
+    difficulty: 4,
+    popularity: 0.5,
+    code: `# FreeBSD 예시\nuname -a\npkg install nginx\nservice nginx start`,
+    details: "BSD 계열은 FreeBSD, OpenBSD, NetBSD 등으로 나뉘며, 고급 네트워크 기능과 보안 강화로 서버 및 방화벽 등에서 사용됩니다.\n\n• 높은 커널 안정성\n• 지적 재산권 자유로움\n• Apple macOS의 기반\n• PF 방화벽과 같은 고급 기능 제공"
+},
+
+]
+
+
+        let filteredLanguages = languages;
+        let currentFilter = 'all';
+
+        function createLanguageCard(lang) {
+            const difficultyDots = Array.from({length: 5}, (_, i) => 
+                `<div class="difficulty-dot ${i < lang.difficulty ? 'filled' : ''}"></div>`
+            ).join('');
+
+            return `
+                <div class="language-card ${lang.class}" data-category="${lang.category.join(' ')}" data-name="${lang.name.toLowerCase()}">
+                    <div class="language-header">
+                        <div class="language-icon" style="background: var(--accent-color)">${lang.icon}</div>
+                        
+                        <div>
+                            <div class="language-title">${lang.name}</div>
+                            <div class="difficulty-indicator">${difficultyDots}</div>
+                        </div>
+                    </div>
+                    <div class="language-description">${lang.description}</div>
+                    <div class="language-stats">
+                        
+                        <div class="stat">출시: ${lang.year}</div>
+                        <div class="stat">사용난이도: ${lang.difficulty}/5</div>
+                        <div class="stat">카테고리: ${lang.category.join(', ')}</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--popularity: ${lang.popularity}%"></div>
+                    </div>
+                    <button class="toggle-code" onclick="toggleCode(this, event)">코드 예제 보기</button>
+                    <div class="code-preview">
+                        <pre>${lang.code}</pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLanguages() {
+            const grid = document.getElementById('languagesGrid');
+            grid.innerHTML = filteredLanguages.map(createLanguageCard).join('');
+            
+            // Animate cards
+            setTimeout(() => {
+                document.querySelectorAll('.language-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, index * 100);
+                });
+            }, 100);
+        }
+
+        function toggleCode(button, event) {
+            event.stopPropagation();
+            const codePreview = button.nextElementSibling;
+            const isExpanded = codePreview.classList.contains('expanded');
+            
+            if (isExpanded) {
+                codePreview.classList.remove('expanded');
+                button.textContent = '코드 예제 보기';
+            } else {
+                codePreview.classList.add('expanded');
+                button.textContent = '코드 숨기기';
+            }
+        }
+
+        function filterLanguages(category) {
+            if (category === 'all') {
+                filteredLanguages = languages;
+            } else {
+                filteredLanguages = languages.filter(lang => 
+                    lang.category.includes(category)
+                );
+            }
+            renderLanguages();
+        }
+
+        function searchLanguages(query) {
+            const searchTerm = query.toLowerCase();
+            filteredLanguages = languages.filter(lang => {
+                if (currentFilter === 'all') {
+                    return lang.name.toLowerCase().includes(searchTerm) ||
+                           lang.description.toLowerCase().includes(searchTerm);
+                } else {
+                    return lang.category.includes(currentFilter) &&
+                           (lang.name.toLowerCase().includes(searchTerm) ||
+                            lang.description.toLowerCase().includes(searchTerm));
+                }
+            });
+            renderLanguages();
+        }
+
+        function showLanguageDetails(langName) {
+            const lang = languages.find(l => l.name === langName);
+            if (!lang) return;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <h2>${lang.name} 상세 정보</h2>
+                <div class="language-header">
+                   <div class="language-icon" style="background: var(--accent-color)">${lang.icon}</div>
+                        <div class="language-title">${lang.name}</div>
+                        <div class="stat">출시년도: ${lang.year}</div>
+                    </div>
+                </div>
+                <p><strong>설명:</strong> ${lang.description}</p>
+                <p><strong>상세 정보:</strong> ${lang.details}</p>
+                <p><strong>카테고리:</strong> ${lang.category.join(', ')}</p>
+                <p><strong>사용 난이도:</strong> ${lang.difficulty}/5</p>
+                <p><strong>점유율:</strong> ${lang.popularity}%</p>
+                <h3>코드 예제:</h3>
+                <div class="code-preview expanded">
+                    <pre>${lang.code}</pre>
+                </div>
+            `;
+
+            document.getElementById('languageModal').classList.add('active');
+        }
+
+        function updateStats(langName) {
+            const lang = languages.find(l => l.name === langName);
+            if (!lang) return;
+
+            const statsContent = document.getElementById('statsContent');
+            statsContent.innerHTML = `
+                <strong>${lang.name}</strong><br>
+                점유율: ${lang.popularity}%<br>
+                사용난이도: ${lang.difficulty}/5<br>
+                출시: ${lang.year}년
+            `;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            renderLanguages();
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchLanguages(e.target.value);
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    filterLanguages(currentFilter);
+                });
+            });
+
+            // Language card clicks
+            document.addEventListener('click', (e) => {
+                const card = e.target.closest('.language-card');
+                if (card && !e.target.classList.contains('toggle-code')) {
+                    const langName = card.querySelector('.language-title').textContent;
+                    showLanguageDetails(langName);
+                }
+            });
+
+            // Language card hover
+            document.addEventListener('mouseover', (e) => {
+                const card = e.target.closest('.language-card');
+                if (card) {
+                    const langName = card.querySelector('.language-title').textContent;
+                    updateStats(langName);
+                }
+            });
+
+            // Modal close
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('languageModal').classList.remove('active');
+            });
+
+            document.getElementById('languageModal').addEventListener('click', (e) => {
+                if (e.target.id === 'languageModal') {
+                    document.getElementById('languageModal').classList.remove('active');
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.getElementById('languageModal').classList.remove('active');
+                }
+                if (e.key === '/' && !document.activeElement.matches('input')) {
+                    e.preventDefault();
+                    document.getElementById('searchInput').focus();
+                }
+            });
+        });
+
+        // Add some dynamic effects
+        setInterval(() => {
+            const cards = document.querySelectorAll('.language-card');
+            cards.forEach(card => {
+                const icon = card.querySelector('.language-icon');
+                if (Math.random() < 0.1) {
+                    icon.style.transform = 'scale(1.1) rotate(5deg)';
+                    setTimeout(() => {
+                        icon.style.transform = '';
+                    }, 200);
+                }
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

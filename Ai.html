@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>챗봇 메뉴얼</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        .search-container {
+            margin-bottom: 30px;
+            text-align: center;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .search-box {
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 25px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .filter-buttons {
+            margin: 20px 0;
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .languages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .language-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .language-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .language-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .language-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .language-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .language-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .language-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .language-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .language-stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            background: #f0f0f0;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .code-preview {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+            max-height: 0;
+            transition: all 0.5s ease;
+        }
+
+        .code-preview.expanded {
+            max-height: 200px;
+        }
+
+        .toggle-code {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .toggle-code:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 3px;
+            transition: width 2s ease;
+            width: 0;
+        }
+
+        .language-card.visible .progress-fill {
+            width: var(--popularity);
+        }
+
+        /* Language specific colors */
+        .chatgpt { --accent-color: #3ad37f; }
+        .claude { --accent-color: #f8a50c; }
+        .perplexity { --accent-color: #1a1c1d; }
+        .gemini { --accent-color: #8a89b8; }
+        .copilot { --accent-color: #ae61c5; }
+        .huggingface { --accent-color: #8496aa; }
+        .jasper { --accent-color: #c2cc31; }
+        .grok { --accent-color: #503a22; }
+        .blackberry { --accent-color: #31221c; }
+
+
+
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .languages-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .floating-stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .difficulty-indicator {
+            display: flex;
+            gap: 3px;
+            margin-top: 5px;
+        }
+
+        .difficulty-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-dot.filled {
+            background: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>챗봇 가이드</h1>
+            <p>현대식 챗봇를 탐구해보세요!</p>
+        </div>
+
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="언어를 검색해보세요... (예: Python, JavaScript)" id="searchInput">
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">전체</button>
+            <button class="filter-btn" data-filter="프리미엄">프리미엄</button>
+            <button class="filter-btn" data-filter="무료">무료</button>
+            <button class="filter-btn" data-filter="링크인식">링크인식</button>
+            <button class="filter-btn" data-filter="무료api">무료api</button>
+            <button class="filter-btn" data-filter="코딩">코딩</button>
+
+
+
+        </div>
+
+        <div class="floating-stats">
+            <div id="statsContent">
+                언어를 선택해주세요
+            </div>
+        </div>
+
+        <div class="languages-grid" id="languagesGrid">
+            <!-- Languages will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <div class="modal" id="languageModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div id="modalContent">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const languages = [
+{
+    name: "ChatGPT",
+    class: "chatgpt",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/e/ef/ChatGPT-Logo.svg",
+    description: "OpenAI가 개발한 GPT 시리즈 기반 AI 챗봇. 대화형 인공지능의 대표주자.",
+    category: ["프리미엄", "무료", "코딩", "링크인식"],
+    year: 2022,
+    difficulty: 3,
+    popularity: 90,
+    code: `사용자: 오늘 날씨 어때?\nChatGPT: 지역을 알려주시면 알려드릴게요!`,
+    details: "ChatGPT는 OpenAI가 개발한 GPT 언어 모델 기반의 인공지능 챗봇입니다. 자연스러운 대화를 지원하며, 프로그래밍, 번역, 요약, 창작 등 다양한 작업을 수행할 수 있습니다."
+},
+{
+    name: "Claude-AI",
+    class: "claude",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/5/58/Claude-ai-icon.svg",
+    description: "Anthropic이 개발한 대화형 인공지능. 안전성과 윤리를 강조합니다.",
+    category: ["프리미엄", "코딩"],
+    year: 2023,
+    difficulty: 5,
+    popularity: 75,
+    code: `사용자: 윤리적인 AI란 뭘까?\nClaude: 인간 중심적인 의사결정을 돕는 AI라고 볼 수 있어요.`,
+    details: "Claude는 Anthropic이 개발한 언어 모델 기반 AI로, 인간 중심적인 설계를 목표로 하며, 신뢰성과 책임 있는 응답을 강조합니다. 교육, 헬프데스크, 콘텐츠 생성 분야에 활용됩니다."
+},
+{
+    name: "Perplexity",
+    class: "perplexity",
+    icon: "https://logolist.net/wp-content/uploads/2024/04/perplexity.svg",
+    description: "실시간 검색 기반의 AI 비서. 정보 출처와 정확성을 중시합니다.",
+    category:  ["무료", "링크인식"],
+    year: 2023,
+    difficulty: 5,
+    popularity: 70,
+    code: `사용자: 애플의 최신 뉴스 알려줘\nPerplexity: [출처: The Verge] 2025년 8월 1일자 보도에 따르면...`,
+    details: "Perplexity는 실시간 정보 검색 기능을 통합한 AI로, 사용자의 질문에 대해 직접적으로 출처를 명시하고 최신 뉴스를 요약하는 기능에 특화되어 있습니다."
+},
+{
+    name: "Google Gemini",
+    class: "gemini",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/8/8f/Google-gemini-icon.svg",
+    description: "Google DeepMind가 개발한 멀티모달 AI. 텍스트, 이미지, 코드 등 다양한 형식 처리 가능.",
+    category:  ["무료", "코딩", "무료api", "링크인식"],
+    year: 2023,
+    difficulty: 4,
+    popularity: 70,
+    code: `사용자: 이 코드를 설명해줘 (이미지 첨부)\nGemini: 코드 이미지에서 for 루프를 확인했습니다. 해당 루프는 배열을 순회하며...`,
+    details: "Gemini는 Google DeepMind에서 개발한 대규모 멀티모달 AI로, 텍스트뿐 아니라 이미지, 오디오, 코드 등의 다양한 입력을 해석하고 분석할 수 있습니다. 구글 검색, 문서, 앱 등과 통합되어 폭넓게 활용됩니다."
+},
+{
+    name: "Microsoft Copilot",
+    class: "copilot",
+    icon: "https://img.icons8.com/?size=100&id=PxQoyT1s0uFh&format=png&color=000000",
+    description: "Microsoft 제품군에 통합된 AI 조력자. 코딩, 문서 작업, 이메일 등 자동화 지원.",
+    category: ["프리미엄", "코딩"],
+    year: 2023,
+    difficulty: 2,
+    popularity: 60,
+    code: `// Visual Studio에서 제안 예시\n// 사용자가 입력: public class Person\n// Copilot 자동 완성: {\n  public string Name { get; set; }\n}`,
+    details: "Copilot은 Microsoft가 GitHub 및 OpenAI와 협력하여 만든 AI 어시스턴트입니다. Visual Studio, Word, Excel, PowerPoint 등 Microsoft 365 전반에 걸쳐 작업을 자동화하고 제안합니다."
+},
+{
+    name: "Hugging Face",
+    class: "huggingface",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Noto_Emoji_v2.034_1f917.svg",
+    description: "오픈소스 AI 생태계의 중심. 다양한 모델과 데이터셋 공유를 지원합니다.",
+    category: ["무료", "링크인식", "무료api", "코딩"],
+    year: 2016,
+    difficulty: 4,
+    popularity: 55,
+    code: `from transformers import pipeline\nqa = pipeline("question-answering")\nqa(question="AI란?", context="AI는 인공지능을 의미합니다.")`,
+    details: "Hugging Face는 AI/ML 연구자들을 위한 플랫폼으로, Transformers, Diffusers, Datasets 등 다양한 라이브러리를 제공합니다. 누구나 모델을 공유하거나 학습시킬 수 있어 연구 커뮤니티에서 널리 사용됩니다."
+},
+{
+    name: "Jasper",
+    class: "jasper",
+    icon: "https://img.icons8.com/?size=100&id=111031&format=png&color=000000",
+    description: "콘텐츠 작성을 위한 AI 플랫폼. 마케팅, 블로그, SNS 포스트 자동화에 특화.",
+    category: ["프리미엄"],
+    year: 2021,
+    difficulty: 3,
+    popularity: 50,
+    code: `사용자: 제품 설명 작성해줘 (입력: 무선 이어폰)\nJasper: "이 무선 이어폰은 고음질 사운드와 편안한 착용감을 자랑합니다..."`,
+    details: "Jasper는 기업 및 크리에이터를 위한 콘텐츠 제작 AI입니다. 마케팅 문구, 블로그, SNS 포스트, 광고 문안 등 다양한 글쓰기를 자동으로 생성하며, 브랜드 톤과 스타일 설정도 가능합니다."
+},
+{
+    name: "Grok",
+    class: "grok",
+    icon: "https://img.icons8.com/?size=100&id=SvMVhUPAeXkz&format=png&color=000000",
+    description: "Elon Musk가 만든 X(AI)의 대화형 AI. X(Twitter)와 통합되어 실시간 정보 기반 답변 제공.",
+    category: ["프리미엄", "링크인식"],
+    year: 2023,
+    difficulty: 3,
+    popularity: 45,
+    code: `사용자: 오늘 테슬라 주식 어때?\nGrok: 오늘 테슬라(TSLA)는 전일 대비 2.3% 상승했습니다. (출처: X 실시간 뉴스)`,
+    details: "Grok은 Elon Musk의 AI 스타트업 xAI가 개발한 언어모델 기반 AI로, X(구 Twitter)와 직접 통합되어 실시간 트렌드, 뉴스, 주식 등과 관련된 정보를 빠르게 제공합니다. 경쟁 서비스보다 직설적이고 유머러스한 응답을 특징으로 하며, 대중성과 기술 실험성을 동시에 추구하는 것이 특징입니다.\n\n현재 X Premium 사용자에게 우선 제공되며, SNS와의 밀접한 통합 덕분에 뉴스/트렌드 탐색 도구로 주목받고 있습니다."
+}
+
+]
+
+
+        let filteredLanguages = languages;
+        let currentFilter = 'all';
+
+        function createLanguageCard(lang) {
+            const difficultyDots = Array.from({length: 5}, (_, i) => 
+                `<div class="difficulty-dot ${i < lang.difficulty ? 'filled' : ''}"></div>`
+            ).join('');
+
+            return `
+                <div class="language-card ${lang.class}" data-category="${lang.category.join(' ')}" data-name="${lang.name.toLowerCase()}">
+                    <div class="language-header">
+                        <div class="language-icon" style="background: var(--accent-color)"> 
+                        <img src="${lang.icon}" alt="${lang.name} 로고" class="language-logo" />
+</div>
+                        
+                        <div>
+                            <div class="language-title">${lang.name}</div>
+                            <div class="difficulty-indicator">${difficultyDots}</div>
+                        </div>
+                    </div>
+                    <div class="language-description">${lang.description}</div>
+                    <div class="language-stats">
+                        
+                        <div class="stat">출시: ${lang.year}</div>
+                        <div class="stat">정확도: ${lang.difficulty}/5</div>
+                        <div class="stat">카테고리: ${lang.category.join(', ')}</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="--popularity: ${lang.popularity}%"></div>
+                    </div>
+                    <button class="toggle-code" onclick="toggleCode(this, event)">코드 예제 보기</button>
+                    <div class="code-preview">
+                        <pre>${lang.code}</pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderLanguages() {
+            const grid = document.getElementById('languagesGrid');
+            grid.innerHTML = filteredLanguages.map(createLanguageCard).join('');
+            
+            // Animate cards
+            setTimeout(() => {
+                document.querySelectorAll('.language-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, index * 100);
+                });
+            }, 100);
+        }
+
+        function toggleCode(button, event) {
+            event.stopPropagation();
+            const codePreview = button.nextElementSibling;
+            const isExpanded = codePreview.classList.contains('expanded');
+            
+            if (isExpanded) {
+                codePreview.classList.remove('expanded');
+                button.textContent = '코드 예제 보기';
+            } else {
+                codePreview.classList.add('expanded');
+                button.textContent = '코드 숨기기';
+            }
+        }
+
+        function filterLanguages(category) {
+            if (category === 'all') {
+                filteredLanguages = languages;
+            } else {
+                filteredLanguages = languages.filter(lang => 
+                    lang.category.includes(category)
+                );
+            }
+            renderLanguages();
+        }
+
+        function searchLanguages(query) {
+            const searchTerm = query.toLowerCase();
+            filteredLanguages = languages.filter(lang => {
+                if (currentFilter === 'all') {
+                    return lang.name.toLowerCase().includes(searchTerm) ||
+                           lang.description.toLowerCase().includes(searchTerm);
+                } else {
+                    return lang.category.includes(currentFilter) &&
+                           (lang.name.toLowerCase().includes(searchTerm) ||
+                            lang.description.toLowerCase().includes(searchTerm));
+                }
+            });
+            renderLanguages();
+        }
+
+        function showLanguageDetails(langName) {
+            const lang = languages.find(l => l.name === langName);
+            if (!lang) return;
+
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
+                <h2>${lang.name} 상세 정보</h2>
+                <div class="language-header">
+                   <div class="language-icon" style="background: var(--accent-color)">
+                     <img src="${lang.icon}" alt="${lang.name} 로고" class="language-logo" />
+</div>
+                        <div class="language-title">${lang.name}</div>
+                        <div class="stat">출시년도: ${lang.year}</div>
+                    </div>
+                </div>
+                <p><strong>설명:</strong> ${lang.description}</p>
+                <p><strong>상세 정보:</strong> ${lang.details}</p>
+                <p><strong>카테고리:</strong> ${lang.category.join(', ')}</p>
+                <p><strong>정확도:</strong> ${lang.difficulty}/5</p>
+                <p><strong>인기도:</strong> ${lang.popularity}%</p>
+                <h3>코드 예제:</h3>
+                <div class="code-preview expanded">
+                    <pre>${lang.code}</pre>
+                </div>
+            `;
+
+            document.getElementById('languageModal').classList.add('active');
+        }
+
+        function updateStats(langName) {
+            const lang = languages.find(l => l.name === langName);
+            if (!lang) return;
+
+            const statsContent = document.getElementById('statsContent');
+            statsContent.innerHTML = `
+                <strong>${lang.name}</strong><br>
+                인기도: ${lang.popularity}%<br>
+                정확도: ${lang.difficulty}/5<br>
+                출시: ${lang.year}년
+            `;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            renderLanguages();
+
+            // Search functionality
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchLanguages(e.target.value);
+            });
+
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    filterLanguages(currentFilter);
+                });
+            });
+
+            // Language card clicks
+            document.addEventListener('click', (e) => {
+                const card = e.target.closest('.language-card');
+                if (card && !e.target.classList.contains('toggle-code')) {
+                    const langName = card.querySelector('.language-title').textContent;
+                    showLanguageDetails(langName);
+                }
+            });
+
+            // Language card hover
+            document.addEventListener('mouseover', (e) => {
+                const card = e.target.closest('.language-card');
+                if (card) {
+                    const langName = card.querySelector('.language-title').textContent;
+                    updateStats(langName);
+                }
+            });
+
+            // Modal close
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('languageModal').classList.remove('active');
+            });
+
+            document.getElementById('languageModal').addEventListener('click', (e) => {
+                if (e.target.id === 'languageModal') {
+                    document.getElementById('languageModal').classList.remove('active');
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.getElementById('languageModal').classList.remove('active');
+                }
+                if (e.key === '/' && !document.activeElement.matches('input')) {
+                    e.preventDefault();
+                    document.getElementById('searchInput').focus();
+                }
+            });
+        });
+
+        // Add some dynamic effects
+        setInterval(() => {
+            const cards = document.querySelectorAll('.language-card');
+            cards.forEach(card => {
+                const icon = card.querySelector('.language-icon');
+                if (Math.random() < 0.1) {
+                    icon.style.transform = 'scale(1.1) rotate(5deg)';
+                    setTimeout(() => {
+                        icon.style.transform = '';
+                    }, 200);
+                }
+            });
+        }, 3000);
+    </script>
+</body>
+</html>
